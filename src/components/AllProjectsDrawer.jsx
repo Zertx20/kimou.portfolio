@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PlayIcon from "./PlayIcon.jsx";
+import { vimeoThumbnail } from "../lib/vimeo.js";
 
 const ALL_PROJECTS = [
-  { title: "Project 01", category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
-  { title: "Project 02", category: "Long-Form", vimeoId: "1197093636", bg: "#0d1117" },
+  { title: "Project 01", category: "Short-Form", vimeoId: "1197098638", bg: "#1a1a2e" },
+  { title: "Project 02", category: "Short-Form", vimeoId: "1197093636", bg: "#0d1117" },
   { title: "Project 03", category: "Short-Form", vimeoId: "1197098353", bg: "#1a1000" },
   { title: "Project 04", category: "Creative", vimeoId: "1197098439", bg: "#0a1a10" },
   { title: "Project 05", category: "E-Commerce", vimeoId: "1197098323", bg: "#1a0a0a" },
@@ -22,13 +23,21 @@ const ALL_PROJECTS = [
   { title: "Project 17", category: "Short-Form", vimeoId: "1197007850", bg: "#1a0a0a" },
 ];
 
+const CARD_HEIGHT_MOBILE = "calc((100vw - 32px) / 2 * 16 / 9)";
+const CARD_HEIGHT_DESKTOP = "calc((100vw - 40px) / 3 * 16 / 9)";
+
 export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
   const startY = useRef(null);
   const [gridColumns, setGridColumns] = useState("repeat(2, 1fr)");
+  const [cardHeight, setCardHeight] = useState(CARD_HEIGHT_MOBILE);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setGridColumns(mq.matches ? "repeat(3, 1fr)" : "repeat(2, 1fr)");
+    const update = () => {
+      const desktop = mq.matches;
+      setGridColumns(desktop ? "repeat(3, 1fr)" : "repeat(2, 1fr)");
+      setCardHeight(desktop ? CARD_HEIGHT_DESKTOP : CARD_HEIGHT_MOBILE);
+    };
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
@@ -169,15 +178,38 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                   onClick={() => onVideoSelect?.(card)}
                   style={{
                     position: "relative",
-                    width: "100%",
-                    aspectRatio: "9/16",
-                    borderRadius: "10px",
                     overflow: "hidden",
+                    width: "100%",
+                    height: cardHeight,
+                    borderRadius: "10px",
                     background: card.bg,
                     cursor: "pointer",
-                    flexShrink: 0,
+                    display: "block",
                   }}
                 >
+                  <img
+                    src={vimeoThumbnail(card.vimeoId)}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "center top",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "rgba(0,0,0,0.3)",
+                    }}
+                  />
+
                   <div
                     style={{
                       position: "absolute",
@@ -192,7 +224,7 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      zIndex: 5,
+                      zIndex: 3,
                       pointerEvents: "none",
                     }}
                   >
@@ -205,10 +237,9 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      padding: "10px 8px",
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)",
-                      zIndex: 5,
+                      padding: "24px 8px 8px",
+                      background: "linear-gradient(to top, rgba(0,0,0,0.92), transparent)",
+                      zIndex: 3,
                       pointerEvents: "none",
                     }}
                   >

@@ -11,8 +11,8 @@ const TRACKS = [
 ];
 
 const projects = [
-  { category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
-  { category: "Long-Form", vimeoId: "1197093636", bg: "#0d1117" },
+  { category: "Short-Form", vimeoId: "1197098638", bg: "#1a1a2e" },
+  { category: "Short-Form", vimeoId: "1197093636", bg: "#0d1117" },
   { category: "Short-Form", vimeoId: "1197098353", bg: "#1a1000" },
 ];
 
