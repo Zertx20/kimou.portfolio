@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VideoPlayer from "./VideoPlayer.jsx";
+import { vimeoPlayerEmbed } from "../lib/vimeo.js";
 
 export default function Lightbox({ project, onClose }) {
   useEffect(() => {
@@ -79,8 +80,9 @@ export default function Lightbox({ project, onClose }) {
                 />
               ) : project.vimeoId ? (
                 <iframe
-                  src={`https://player.vimeo.com/video/${project.vimeoId}?autoplay=1&color=C8FF00&title=0&byline=0&portrait=0`}
+                  src={vimeoPlayerEmbed(project.vimeoId)}
                   title={project.title}
+                  loading="lazy"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
                   style={{

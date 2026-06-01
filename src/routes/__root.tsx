@@ -100,6 +100,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
+      { rel: "preconnect", href: "https://player.vimeo.com" },
+      { rel: "preconnect", href: "https://i.vimeocdn.com" },
+      { rel: "dns-prefetch", href: "https://vumbnail.com" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap",

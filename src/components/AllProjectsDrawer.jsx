@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PlayIcon from "./PlayIcon.jsx";
+import { vimeoThumbnail } from "../lib/vimeo.js";
 
 const ALL_PROJECTS = [
   { title: "Project 01", category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
@@ -23,27 +25,6 @@ const ALL_PROJECTS = [
 
 export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
   const startY = useRef(null);
-  const [thumbnails, setThumbnails] = useState({});
-
-  useEffect(() => {
-    if (!ALL_PROJECTS || ALL_PROJECTS.length === 0) return;
-
-    ALL_PROJECTS.forEach(async (project) => {
-      if (!project.vimeoId) return;
-      try {
-        const res = await fetch(`https://vimeo.com/api/v2/video/${project.vimeoId}.json`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data || !data[0]) return;
-        setThumbnails((prev) => ({
-          ...prev,
-          [project.vimeoId]: data[0].thumbnail_large,
-        }));
-      } catch (e) {
-        console.warn("Thumbnail fetch failed for", project.vimeoId, e);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -182,21 +163,20 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                     cursor: "pointer",
                   }}
                 >
-                  {thumbnails[project.vimeoId] && (
-                    <img
-                      src={thumbnails[project.vimeoId]}
-                      alt={project.title}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "center top",
-                      }}
-                      loading="lazy"
-                    />
-                  )}
+                  <img
+                    src={vimeoThumbnail(project.vimeoId)}
+                    alt={project.title}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "center top",
+                    }}
+                    loading="lazy"
+                    decoding="async"
+                  />
 
                   <div
                     style={{
@@ -224,7 +204,7 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                       pointerEvents: "none",
                     }}
                   >
-                    <span style={{ color: "#C8FF00", fontSize: 14, paddingLeft: 3 }}>▶</span>
+                    <PlayIcon size={16} color="#C8FF00" style={{ marginLeft: 2 }} />
                   </div>
 
                   <div

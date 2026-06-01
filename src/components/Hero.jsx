@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import PlayIcon from "./PlayIcon.jsx";
+import { vimeoBackgroundEmbed, vimeoThumbnail } from "../lib/vimeo.js";
 
 const TRACKS = [
   { top: "18%", dotDur: "7s", dotDelay: "0s", keyframes: [12, 34, 58, 81] },
@@ -20,11 +22,30 @@ export default function Hero({ onOpen, paused }) {
   const safeProjects = Array.isArray(projects) ? projects : [];
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [showEmbed, setShowEmbed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const touchX = useRef(null);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
 
   const currentProject = safeProjects[index] ?? safeProjects[0];
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  /* Poster first, then load Vimeo only for the active slide (saves mobile bandwidth). */
+  useEffect(() => {
+    setShowEmbed(false);
+    if (paused) return;
+    const delay = isMobile ? 900 : 350;
+    const timer = window.setTimeout(() => setShowEmbed(true), delay);
+    return () => window.clearTimeout(timer);
+  }, [currentProject?.vimeoId, isMobile, paused]);
 
   useEffect(() => {
     if (paused || safeProjects.length === 0) return;
@@ -243,21 +264,41 @@ export default function Hero({ onOpen, paused }) {
             }}
             onClick={() => onOpen?.(currentProject)}
           >
-            <iframe
-              key={currentProject.vimeoId}
-              src={`https://player.vimeo.com/video/${currentProject.vimeoId}?autoplay=1&muted=1&background=1&loop=1&transparent=0&quality=720p`}
-              title={currentProject.title}
+            <img
+              src={vimeoThumbnail(currentProject.vimeoId)}
+              alt=""
+              decoding="async"
+              fetchPriority="high"
               style={{
                 position: "absolute",
                 inset: 0,
                 width: "100%",
                 height: "100%",
-                border: "none",
-                pointerEvents: "none",
-                display: "block",
+                objectFit: "cover",
+                objectPosition: "center",
+                opacity: showEmbed ? 0 : 1,
+                transition: "opacity 0.35s ease",
               }}
-              allow="autoplay; fullscreen"
             />
+            {showEmbed && (
+              <iframe
+                key={currentProject.vimeoId}
+                src={vimeoBackgroundEmbed(currentProject.vimeoId, { mobile: isMobile })}
+                title={currentProject.title}
+                loading="lazy"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                  pointerEvents: "none",
+                  display: "block",
+                  opacity: 1,
+                }}
+                allow="autoplay; fullscreen"
+              />
+            )}
             <div
               style={{
                 position: "absolute",
@@ -285,7 +326,7 @@ export default function Hero({ onOpen, paused }) {
                 pointerEvents: "none",
               }}
             >
-              <span style={{ fontSize: "18px", color: "#C8FF00", paddingLeft: "3px" }}>▶</span>
+              <PlayIcon size={20} color="#C8FF00" style={{ marginLeft: 3 }} />
             </div>
             <div style={{ position: "absolute", left: 12, bottom: 12, zIndex: 10 }}>
               <span
