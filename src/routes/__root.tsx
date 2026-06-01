@@ -136,6 +136,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div
+        className="site-root"
         style={{
           background: "#080808",
           color: "#F0EDE8",

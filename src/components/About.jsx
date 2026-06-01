@@ -98,42 +98,12 @@ export default function About() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          style={{
-            marginTop: 64,
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
+          className="about-stats"
         >
-          {stats.map((s, i) => (
-            <div
-              key={s.l}
-              style={{
-                padding: "24px 40px",
-                borderRight: i < stats.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "Syne, sans-serif",
-                  fontWeight: 800,
-                  color: "#C8FF00",
-                  fontSize: "clamp(28px, 4vw, 48px)",
-                }}
-              >
-                {s.n}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  color: "#888888",
-                  fontSize: 12,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.2em",
-                }}
-              >
-                {s.l}
-              </div>
+          {stats.map((s) => (
+            <div key={s.l} className="about-stat">
+              <div className="about-stat-number">{s.n}</div>
+              <div className="about-stat-label">{s.l}</div>
             </div>
           ))}
         </motion.div>

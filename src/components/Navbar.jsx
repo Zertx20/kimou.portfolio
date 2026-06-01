@@ -21,7 +21,7 @@ export default function Navbar() {
     e.preventDefault();
     setOpen(false);
     const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
   };
 
   return (

@@ -1,9 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VideoPlayer from "./VideoPlayer.jsx";
 import { vimeoPlayerEmbed } from "../lib/vimeo.js";
 
 export default function Lightbox({ project, onClose }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   useEffect(() => {
     if (!project) return;
     const onKey = (e) => {
@@ -16,6 +26,8 @@ export default function Lightbox({ project, onClose }) {
       document.body.style.overflow = "";
     };
   }, [project, onClose]);
+
+  const portrait = isMobile;
 
   return (
     <AnimatePresence>
@@ -34,7 +46,7 @@ export default function Lightbox({ project, onClose }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "16px 40px",
+            padding: portrait ? "12px 10px" : "16px 40px",
           }}
         >
           <button
@@ -42,8 +54,8 @@ export default function Lightbox({ project, onClose }) {
             onClick={onClose}
             style={{
               position: "absolute",
-              top: 20,
-              right: 20,
+              top: portrait ? 12 : 20,
+              right: portrait ? 12 : 20,
               width: 44,
               height: 44,
               borderRadius: "50%",
@@ -55,18 +67,33 @@ export default function Lightbox({ project, onClose }) {
               justifyContent: "center",
               fontSize: 20,
               cursor: "pointer",
+              zIndex: 60,
             }}
           >
             ×
           </button>
 
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 1024 }}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: portrait ? "min(100%, 420px)" : 1024,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <div
               style={{
                 position: "relative",
-                aspectRatio: "16 / 9",
+                width: portrait ? "100%" : "100%",
+                maxWidth: portrait ? "min(92vw, 380px)" : "100%",
+                aspectRatio: portrait ? "9 / 16" : "16 / 9",
+                maxHeight: portrait ? "min(82dvh, 720px)" : "none",
                 background: "#000",
                 border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: portrait ? 12 : 0,
+                overflow: "hidden",
               }}
             >
               {project.videoSrc ? (
@@ -80,9 +107,8 @@ export default function Lightbox({ project, onClose }) {
                 />
               ) : project.vimeoId ? (
                 <iframe
-                  src={vimeoPlayerEmbed(project.vimeoId)}
-                  title={project.title}
-                  loading="lazy"
+                  src={vimeoPlayerEmbed(project.vimeoId, { mobile: isMobile })}
+                  title={project.category || "Video"}
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
                   style={{
@@ -96,7 +122,7 @@ export default function Lightbox({ project, onClose }) {
               ) : (
                 <iframe
                   src={`https://www.youtube.com/embed/${project.ytId}?autoplay=1`}
-                  title={project.title}
+                  title={project.category || "Video"}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   style={{
@@ -111,14 +137,16 @@ export default function Lightbox({ project, onClose }) {
             </div>
             <div
               style={{
-                marginTop: 20,
+                marginTop: 16,
+                width: "100%",
+                maxWidth: portrait ? "min(92vw, 380px)" : "100%",
                 display: "flex",
-                alignItems: "baseline",
+                alignItems: "center",
                 justifyContent: "space-between",
                 gap: 16,
               }}
             >
-              <div>
+              {project.category ? (
                 <p
                   style={{
                     fontSize: 12,
@@ -130,20 +158,10 @@ export default function Lightbox({ project, onClose }) {
                 >
                   {project.category}
                 </p>
-                <h3
-                  style={{
-                    fontFamily: "Syne, sans-serif",
-                    fontWeight: 800,
-                    fontSize: "clamp(24px, 4vw, 30px)",
-                    color: "#F0EDE8",
-                    marginTop: 8,
-                    marginBottom: 0,
-                  }}
-                >
-                  {project.title}
-                </h3>
-              </div>
-              <p style={{ color: "#888888", fontSize: 12, margin: 0 }}>ESC to close</p>
+              ) : (
+                <span />
+              )}
+              <p style={{ color: "#888888", fontSize: 12, margin: 0 }}>Tap outside to close</p>
             </div>
           </div>
         </motion.div>

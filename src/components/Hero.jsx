@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import PlayIcon from "./PlayIcon.jsx";
 import { vimeoBackgroundEmbed, vimeoThumbnail } from "../lib/vimeo.js";
 
@@ -11,24 +11,127 @@ const TRACKS = [
 ];
 
 const projects = [
-  { title: "Project 01", category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
-  { title: "Project 02", category: "Long-Form", vimeoId: "1197093636", bg: "#0d1117" },
-  { title: "Project 03", category: "Short-Form", vimeoId: "1197098353", bg: "#1a1000" },
+  { category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
+  { category: "Long-Form", vimeoId: "1197093636", bg: "#0d1117" },
+  { category: "Short-Form", vimeoId: "1197098353", bg: "#1a1000" },
 ];
 
-const SLIDE_DURATION = 7000;
+const SLIDE_DURATION = 10000;
+
+function HeroVideo({ project, isMobile, isActive, preloadOnly, onReady, initialReady = false }) {
+  const [showEmbed, setShowEmbed] = useState(initialReady);
+  const [videoReady, setVideoReady] = useState(initialReady);
+
+  useEffect(() => {
+    if (!isActive && !preloadOnly) return;
+    if (initialReady) {
+      setShowEmbed(true);
+      setVideoReady(true);
+      return;
+    }
+    setShowEmbed(false);
+    setVideoReady(false);
+    const delay = preloadOnly ? 0 : isMobile ? 300 : 150;
+    const timer = window.setTimeout(() => setShowEmbed(true), delay);
+    return () => window.clearTimeout(timer);
+  }, [project.vimeoId, isMobile, isActive, preloadOnly, initialReady]);
+
+  const handleIframeLoad = useCallback(() => {
+    setVideoReady(true);
+    onReady?.(project.vimeoId);
+  }, [onReady, project.vimeoId]);
+
+  if (preloadOnly) {
+    if (!showEmbed) return null;
+    return (
+      <iframe
+        key={`preload-${project.vimeoId}`}
+        src={vimeoBackgroundEmbed(project.vimeoId, { mobile: isMobile })}
+        title=""
+        tabIndex={-1}
+        aria-hidden
+        onLoad={handleIframeLoad}
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+          border: "none",
+        }}
+      />
+    );
+  }
+
+  return (
+    <>
+      <img
+        src={vimeoThumbnail(project.vimeoId)}
+        alt=""
+        decoding="async"
+        fetchPriority={isActive ? "high" : "low"}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+          zIndex: 2,
+          opacity: videoReady ? 0 : 1,
+          transition: videoReady ? "opacity 0.4s ease" : "none",
+          pointerEvents: "none",
+        }}
+      />
+      {showEmbed && (
+        <iframe
+          key={project.vimeoId}
+          src={vimeoBackgroundEmbed(project.vimeoId, { mobile: isMobile })}
+          title={project.category}
+          onLoad={handleIframeLoad}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            border: "none",
+            pointerEvents: "none",
+            display: "block",
+            zIndex: 1,
+            opacity: videoReady ? 1 : 0,
+            transition: videoReady ? "opacity 0.4s ease" : "none",
+            background: "transparent",
+          }}
+          allow="autoplay; fullscreen"
+        />
+      )}
+    </>
+  );
+}
 
 export default function Hero({ onOpen, paused }) {
   const safeProjects = Array.isArray(projects) ? projects : [];
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [showEmbed, setShowEmbed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [readyIds, setReadyIds] = useState(() => new Set());
+  const [currentReady, setCurrentReady] = useState(false);
   const touchX = useRef(null);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
 
   const currentProject = safeProjects[index] ?? safeProjects[0];
+  const nextIndex = safeProjects.length ? (index + 1) % safeProjects.length : 0;
+  const nextProject = safeProjects[nextIndex];
+
+  const markReady = useCallback((vimeoId) => {
+    setReadyIds((prev) => {
+      if (prev.has(vimeoId)) return prev;
+      const next = new Set(prev);
+      next.add(vimeoId);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -38,14 +141,9 @@ export default function Hero({ onOpen, paused }) {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  /* Poster first, then load Vimeo only for the active slide (saves mobile bandwidth). */
   useEffect(() => {
-    setShowEmbed(false);
-    if (paused) return;
-    const delay = isMobile ? 900 : 350;
-    const timer = window.setTimeout(() => setShowEmbed(true), delay);
-    return () => window.clearTimeout(timer);
-  }, [currentProject?.vimeoId, isMobile, paused]);
+    setCurrentReady(readyIds.has(currentProject?.vimeoId));
+  }, [currentProject?.vimeoId, readyIds]);
 
   useEffect(() => {
     if (paused || safeProjects.length === 0) return;
@@ -89,7 +187,7 @@ export default function Hero({ onOpen, paused }) {
 
   const scrollTo = (id) => (e) => {
     e.preventDefault();
-    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -253,6 +351,7 @@ export default function Hero({ onOpen, paused }) {
             margin: "0 auto",
             borderRadius: "16px",
             overflow: "hidden",
+            background: currentProject.bg,
           }}
         >
           <div
@@ -264,39 +363,20 @@ export default function Hero({ onOpen, paused }) {
             }}
             onClick={() => onOpen?.(currentProject)}
           >
-            <img
-              src={vimeoThumbnail(currentProject.vimeoId)}
-              alt=""
-              decoding="async"
-              fetchPriority="high"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center",
-                opacity: showEmbed ? 0 : 1,
-                transition: "opacity 0.35s ease",
-              }}
+            <HeroVideo
+              project={currentProject}
+              isMobile={isMobile}
+              isActive={!paused}
+              initialReady={readyIds.has(currentProject.vimeoId)}
+              onReady={markReady}
             />
-            {showEmbed && (
-              <iframe
-                key={currentProject.vimeoId}
-                src={vimeoBackgroundEmbed(currentProject.vimeoId, { mobile: isMobile })}
-                title={currentProject.title}
-                loading="lazy"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
-                  pointerEvents: "none",
-                  display: "block",
-                  opacity: 1,
-                }}
-                allow="autoplay; fullscreen"
+            {currentReady && nextProject && nextProject.vimeoId !== currentProject.vimeoId && (
+              <HeroVideo
+                project={nextProject}
+                isMobile={isMobile}
+                isActive={false}
+                preloadOnly
+                onReady={markReady}
               />
             )}
             <div
@@ -305,6 +385,7 @@ export default function Hero({ onOpen, paused }) {
                 inset: 0,
                 background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent 50%)",
                 pointerEvents: "none",
+                zIndex: 3,
               }}
             />
             <div
@@ -336,21 +417,9 @@ export default function Hero({ onOpen, paused }) {
                   textTransform: "uppercase",
                   letterSpacing: "0.3em",
                   color: "#C8FF00",
-                  marginBottom: 2,
                 }}
               >
                 {currentProject.category}
-              </span>
-              <span
-                style={{
-                  display: "block",
-                  fontFamily: "Syne, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "14px",
-                  color: "#ffffff",
-                }}
-              >
-                {currentProject.title}
               </span>
             </div>
             <div
@@ -389,7 +458,7 @@ export default function Hero({ onOpen, paused }) {
           {safeProjects.map((_, i) => (
             <button
               key={i}
-              aria-label={`Go to project ${i + 1}`}
+              aria-label={`Go to slide ${i + 1}`}
               onClick={(e) => {
                 e.stopPropagation();
                 jump(i);

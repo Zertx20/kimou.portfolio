@@ -5,7 +5,7 @@ export function vimeoThumbnail(vimeoId) {
 
 /** Background loop embed for hero cards. */
 export function vimeoBackgroundEmbed(vimeoId, { mobile = false } = {}) {
-  const quality = mobile ? "540p" : "720p";
+  const quality = mobile ? "360p" : "540p";
   const params = new URLSearchParams({
     autoplay: "1",
     muted: "1",
@@ -19,7 +19,7 @@ export function vimeoBackgroundEmbed(vimeoId, { mobile = false } = {}) {
 }
 
 /** Full player for lightbox. */
-export function vimeoPlayerEmbed(vimeoId) {
+export function vimeoPlayerEmbed(vimeoId, { mobile = false } = {}) {
   const params = new URLSearchParams({
     autoplay: "1",
     color: "C8FF00",
@@ -28,5 +28,6 @@ export function vimeoPlayerEmbed(vimeoId) {
     portrait: "0",
     dnt: "1",
   });
+  if (mobile) params.set("quality", "540p");
   return `https://player.vimeo.com/video/${vimeoId}?${params}`;
 }

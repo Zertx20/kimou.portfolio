@@ -165,7 +165,7 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                 >
                   <img
                     src={vimeoThumbnail(project.vimeoId)}
-                    alt={project.title}
+                    alt={project.category}
                     style={{
                       position: "absolute",
                       inset: 0,
@@ -221,25 +221,14 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                   >
                     <div
                       style={{
-                        fontSize: 8,
+                        fontSize: 9,
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
                         color: "#C8FF00",
-                        marginBottom: 2,
+                        lineHeight: 1.3,
                       }}
                     >
                       {project.category}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "Syne, sans-serif",
-                        fontWeight: 700,
-                        fontSize: 11,
-                        color: "#ffffff",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {project.title}
                     </div>
                   </div>
                 </div>
