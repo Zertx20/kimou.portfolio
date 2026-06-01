@@ -30,6 +30,7 @@ body,
   min-height: 100%;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   font-family: "DM Sans", sans-serif;
 }
 
@@ -65,8 +66,8 @@ body,
     font-family: var(--font-sans);
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
   }
   @media (prefers-reduced-motion: no-preference) {
     html {

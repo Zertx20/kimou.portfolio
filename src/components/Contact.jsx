@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import ArrowUpRightIcon from "./ArrowUpRightIcon.jsx";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);
@@ -145,7 +146,7 @@ export default function Contact() {
                 @kivv.edits
               </p>
             </div>
-            <span style={{ color: "#C8FF00", fontSize: 20 }}>↗</span>
+            <ArrowUpRightIcon size={20} color="#C8FF00" />
           </motion.a>
           <motion.a
             variants={item}
@@ -180,14 +181,15 @@ export default function Contact() {
                 style={{
                   fontFamily: "Syne, sans-serif",
                   fontWeight: 800,
-                  fontSize: 20,
+                  fontSize: "clamp(16px, 4.5vw, 20px)",
                   margin: 0,
+                  whiteSpace: "nowrap",
                 }}
               >
                 +213 558 041 185
               </p>
             </div>
-            <span style={{ color: "#C8FF00", fontSize: 20 }}>↗</span>
+            <ArrowUpRightIcon size={20} color="#C8FF00" />
           </motion.a>
         </div>
 
@@ -226,7 +228,7 @@ export default function Contact() {
               cursor: "pointer",
             }}
           >
-            {sent ? "Sent ✓" : "Send message"}
+            {sent ? "Message sent" : "Send message"}
           </button>
         </motion.form>
       </motion.div>

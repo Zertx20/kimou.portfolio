@@ -18,12 +18,14 @@ function Index() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeVideo, setActiveVideo] = useState(null);
 
-  /* Re-lock body scroll when lightbox closes while drawer is still open */
+  /* Keep body scroll in sync — always unlock when no overlay is open */
   useEffect(() => {
-    if (!activeVideo && drawerOpen) {
-      document.body.style.overflow = "hidden";
-    }
-  }, [activeVideo, drawerOpen]);
+    const lockScroll = drawerOpen || activeVideo || active;
+    document.body.style.overflow = lockScroll ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen, activeVideo, active]);
 
   return (
     <main

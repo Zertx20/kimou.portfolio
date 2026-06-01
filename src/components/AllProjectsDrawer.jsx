@@ -43,16 +43,6 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
 
   const handleTouchStart = (e) => {
     startY.current = e.changedTouches[0].clientY;
