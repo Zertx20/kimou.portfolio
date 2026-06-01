@@ -35,7 +35,7 @@ export default function Contact() {
     <section id="contact" style={{ padding: "128px 24px", background: "#080808" }}>
       <motion.div
         variants={container}
-        initial="hidden"
+        initial={false}
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}
         style={{ maxWidth: 1024, margin: "0 auto" }}
