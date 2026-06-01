@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PlayIcon from "./PlayIcon.jsx";
-import { vimeoThumbnail } from "../lib/vimeo.js";
 
 const ALL_PROJECTS = [
   { title: "Project 01", category: "Brand Film", vimeoId: "1197098638", bg: "#1a1a2e" },
@@ -25,6 +24,15 @@ const ALL_PROJECTS = [
 
 export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
   const startY = useRef(null);
+  const [gridColumns, setGridColumns] = useState("repeat(2, 1fr)");
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setGridColumns(mq.matches ? "repeat(3, 1fr)" : "repeat(2, 1fr)");
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,6 +48,7 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
   const handleTouchStart = (e) => {
     startY.current = e.changedTouches[0].clientY;
   };
+
   const handleTouchMove = (e) => {
     if (startY.current == null) return;
     const dy = e.changedTouches[0].clientY - startY.current;
@@ -61,7 +70,7 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
             position: "fixed",
             inset: 0,
             zIndex: 50,
-            pointerEvents: isOpen ? "all" : "none",
+            pointerEvents: "all",
           }}
         >
           <div
@@ -75,27 +84,26 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             style={{
               position: "absolute",
               bottom: 0,
               left: 0,
               right: 0,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
               height: "92dvh",
               background: "#0d0d0d",
               borderRadius: "20px 20px 0 0",
-              borderTop: "1px solid rgba(255,255,255,0.1)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
             }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
           >
             <div
               style={{
-                width: 36,
-                height: 4,
-                borderRadius: 2,
+                width: "36px",
+                height: "4px",
+                borderRadius: "2px",
                 background: "rgba(255,255,255,0.15)",
                 margin: "12px auto 0",
                 flexShrink: 0,
@@ -113,20 +121,26 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
               }}
             >
               <span
-                style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: 18, color: "#F0EDE8" }}
+                style={{
+                  fontFamily: "Syne, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "18px",
+                  color: "#F0EDE8",
+                }}
               >
                 All Projects
               </span>
               <button
+                type="button"
                 onClick={onClose}
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: "32px",
+                  height: "32px",
                   borderRadius: "50%",
                   background: "#1a1a1a",
                   border: "1px solid rgba(255,255,255,0.1)",
                   color: "#888",
-                  fontSize: 16,
+                  fontSize: "16px",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -142,69 +156,47 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                 flex: 1,
                 overflowY: "auto",
                 WebkitOverflowScrolling: "touch",
-                padding: 12,
+                padding: "12px",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-                gap: 8,
+                gridTemplateColumns: gridColumns,
+                gap: "8px",
                 alignContent: "start",
               }}
             >
-              {ALL_PROJECTS.map((project) => (
+              {ALL_PROJECTS.map((card) => (
                 <div
-                  key={project.vimeoId}
-                  onClick={() => onVideoSelect?.(project)}
+                  key={card.vimeoId}
+                  onClick={() => onVideoSelect?.(card)}
                   style={{
                     position: "relative",
-                    overflow: "hidden",
                     width: "100%",
-                    aspectRatio: "9 / 16",
-                    borderRadius: 10,
-                    background: project.bg,
+                    aspectRatio: "9/16",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: card.bg,
                     cursor: "pointer",
+                    flexShrink: 0,
                   }}
                 >
-                  <img
-                    src={vimeoThumbnail(project.vimeoId)}
-                    alt={project.category}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition: "center top",
-                    }}
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: "rgba(0,0,0,0.3)",
-                    }}
-                  />
-
                   <div
                     style={{
                       position: "absolute",
                       top: "50%",
                       left: "50%",
                       transform: "translate(-50%, -50%)",
-                      width: 40,
-                      height: 40,
+                      width: "40px",
+                      height: "40px",
                       borderRadius: "50%",
                       border: "2px solid #C8FF00",
                       background: "rgba(200,255,0,0.12)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      zIndex: 3,
+                      zIndex: 5,
                       pointerEvents: "none",
                     }}
                   >
-                    <PlayIcon size={16} color="#C8FF00" style={{ marginLeft: 2 }} />
+                    <PlayIcon size={14} color="#C8FF00" style={{ marginLeft: 3 }} />
                   </div>
 
                   <div
@@ -213,22 +205,34 @@ export default function AllProjectsDrawer({ isOpen, onClose, onVideoSelect }) {
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      padding: "24px 8px 8px",
-                      background: "linear-gradient(to top, rgba(0,0,0,0.92), transparent)",
-                      zIndex: 3,
+                      padding: "10px 8px",
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%)",
+                      zIndex: 5,
                       pointerEvents: "none",
                     }}
                   >
                     <div
                       style={{
-                        fontSize: 9,
+                        fontSize: "8px",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
                         color: "#C8FF00",
-                        lineHeight: 1.3,
+                        marginBottom: "2px",
                       }}
                     >
-                      {project.category}
+                      {card.category}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "Syne, sans-serif",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                        color: "#ffffff",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {card.title}
                     </div>
                   </div>
                 </div>
